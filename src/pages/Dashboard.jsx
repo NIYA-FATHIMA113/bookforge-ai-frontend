@@ -94,7 +94,12 @@ function Dashboard() {
             Resources
           </NavLink>
 
-          <NavLink to="/dashboard">
+          <NavLink
+            to="/dashboard/bookings"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+          >
             Bookings
           </NavLink>
 

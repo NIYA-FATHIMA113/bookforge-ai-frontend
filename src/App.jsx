@@ -12,7 +12,7 @@ import BusinessManagement from "./pages/BusinessManagement";
 import AISetup from "./pages/AISetup";
 import { useAuth } from "./context/AuthContext";
 import PublicBooking from "./pages/PublicBooking";
-
+import Bookings from "./pages/Bookings";
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -82,6 +82,16 @@ function App() {
         element={
           isAuthenticated ? (
             <AISetup />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+      <Route
+        path="/dashboard/bookings"
+        element={
+          isAuthenticated ? (
+            <Bookings />
           ) : (
             <Navigate to="/" replace />
           )
