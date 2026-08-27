@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../services/api";
+import "./Bookings.css";
+
 
 function Bookings() {
   const [bookings, setBookings] = useState([]);
@@ -63,7 +65,7 @@ function Bookings() {
 
   if (loading) {
     return (
-      <div>
+      <div className="bookings-loading">
         <h1>Bookings</h1>
         <p>Loading bookings...</p>
       </div>
@@ -71,21 +73,23 @@ function Bookings() {
   }
 
   return (
-    <div>
-      <h1>Bookings</h1>
+    <div className="bookings-page">
+      <header className="bookings-header">
+        <h1>Bookings</h1>
 
-      <p>
-        Manage bookings made by your customers.
-      </p>
+        <p>
+          Manage bookings made by your customers.
+        </p>
+      </header>
 
       {error && (
-        <p>
+        <p className="bookings-error">
           {error}
         </p>
       )}
 
       {bookings.length === 0 ? (
-        <div>
+        <div className="bookings-empty">
           <h2>No bookings yet</h2>
 
           <p>
@@ -93,46 +97,52 @@ function Bookings() {
           </p>
         </div>
       ) : (
-        <div>
+        <div className="bookings-list">
           {bookings.map((booking) => (
-            <div key={booking.id}>
-              <h2>
-                {booking.customer_name}
-              </h2>
+            <article className="booking-card" key={booking.id}>
+              <div className="booking-card-header">
+                <h2>
+                  {booking.customer_name}
+                </h2>
 
-              <p>
-                <strong>Phone:</strong>{" "}
-                {booking.customer_phone}
-              </p>
+                <span className={`booking-status status-${booking.status.toLowerCase()}`}>
+                  {booking.status}
+                </span>
+              </div>
 
-              <p>
-                <strong>Service:</strong>{" "}
-                {booking.service?.name || "N/A"}
-                </p>
+              <div className="booking-details">
+                <div className="booking-detail">
+                  <span className="booking-detail-label">Phone</span>
+                  <span className="booking-detail-value">{booking.customer_phone}</span>
+                </div>
 
-              <p>
-                <strong>Date:</strong>{" "}
-                {booking.booking_date}
-              </p>
+                <div className="booking-detail">
+                  <span className="booking-detail-label">Service</span>
+                  <span className="booking-detail-value">{booking.service?.name || "N/A"}</span>
+                </div>
 
-              <p>
-                <strong>Time:</strong>{" "}
-                {booking.booking_time}
-              </p>
+                <div className="booking-detail">
+                  <span className="booking-detail-label">Date</span>
+                  <span className="booking-detail-value">{booking.booking_date}</span>
+                </div>
 
-              <p>
-                <strong>Resource:</strong>{" "}
-                {booking.resource?.name || "N/A"}
-                </p>
+                <div className="booking-detail">
+                  <span className="booking-detail-label">Time</span>
+                  <span className="booking-detail-value">{booking.booking_time}</span>
+                </div>
 
-              <p>
-                <strong>Status:</strong>{" "}
-                {booking.status}
-              </p>
+                <div className="booking-detail">
+                  <span className="booking-detail-label">Resource</span>
+                  <span className="booking-detail-value">{booking.resource?.name || "N/A"}</span>
+                </div>
 
-              {booking.status === "PENDING" && (
-                <div>
+              </div>
+
+              <div className="booking-actions">
+                {booking.status === "PENDING" && (
+                  <>
                   <button
+                    className="confirm-button"
                     type="button"
                     onClick={() =>
                       updateBookingStatus(
@@ -145,6 +155,7 @@ function Bookings() {
                   </button>
 
                   <button
+                    className="cancel-button"
                     type="button"
                     onClick={() =>
                       updateBookingStatus(
@@ -155,20 +166,20 @@ function Bookings() {
                   >
                     Cancel
                   </button>
-                </div>
-              )}
+                  </>
+                )}
 
-              <button
-                type="button"
-                onClick={() =>
-                  deleteBooking(booking.id)
-                }
-              >
-                Delete
-              </button>
-
-              <hr />
-            </div>
+                <button
+                  className="delete-button"
+                  type="button"
+                  onClick={() =>
+                    deleteBooking(booking.id)
+                  }
+                >
+                  Delete
+                </button>
+              </div>
+            </article>
           ))}
         </div>
       )}
