@@ -16,11 +16,25 @@ function PublicBooking() {
   const [slots, setSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] =
   useState("");
-  
+
+  const [customerName, setCustomerName] =
+  useState("");
+
+  const [customerPhone, setCustomerPhone] =
+    useState("");
+
+  const [bookingLoading, setBookingLoading] =
+    useState(false);
+
+  const [bookingError, setBookingError] =
+    useState("");
+
+  const [bookingSuccess, setBookingSuccess] =
+    useState(null);
 
   const [loading, setLoading] = useState(true);
   const [loadingSlots, setLoadingSlots] =
-    useState(false);
+      useState(false);
 
   const [error, setError] = useState("");
   const [slotError, setSlotError] =
@@ -126,7 +140,97 @@ function PublicBooking() {
   // --------------------------------
   // Page
   // --------------------------------
+    const handleBooking = async () => {
+    setBookingError("");
+    setBookingSuccess(null);
 
+    if (!customerName.trim()) {
+      setBookingError(
+        "Please enter your name."
+      );
+      return;
+    }
+
+    if (!customerPhone.trim()) {
+      setBookingError(
+        "Please enter your phone number."
+      );
+      return;
+    }
+
+    if (!selectedService) {
+      setBookingError(
+        "Please select a service."
+      );
+      return;
+    }
+
+    if (!selectedDate) {
+      setBookingError(
+        "Please select a date."
+      );
+      return;
+    }
+
+    if (!selectedSlot) {
+      setBookingError(
+        "Please select a time slot."
+      );
+      return;
+    }
+
+    try {
+      setBookingLoading(true);
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/book/${slug}/`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            customer_name:
+              customerName.trim(),
+
+            customer_phone:
+              customerPhone.trim(),
+
+            booking_date:
+              selectedDate,
+
+            booking_time:
+              selectedSlot,
+
+            service:
+              selectedService.id,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail ||
+            data.error ||
+            "Unable to create booking."
+        );
+      }
+
+      setBookingSuccess(data);
+
+    } catch (error) {
+      setBookingError(
+        error.message
+      );
+    } finally {
+      setBookingLoading(false);
+    }
+  };
   return (
     <div className="public-booking">
 
@@ -313,6 +417,96 @@ function PublicBooking() {
             </p>
             )}
 
+        </div>
+      )}
+
+      {selectedSlot && (
+        <div className="customer-section">
+
+          <h2>Customer details</h2>
+
+          <div>
+            <label>Name</label>
+
+            <input
+              type="text"
+              placeholder="Enter your name"
+              value={customerName}
+              onChange={(e) =>
+                setCustomerName(e.target.value)
+              }
+            />
+          </div>
+
+          <div>
+            <label>Phone number</label>
+
+            <input
+              type="tel"
+              placeholder="Enter your phone number"
+              value={customerPhone}
+              onChange={(e) =>
+                setCustomerPhone(e.target.value)
+              }
+            />
+          </div>
+
+          {bookingError && (
+            <p>{bookingError}</p>
+          )}
+
+          <button
+            type="button"
+            disabled={bookingLoading}
+            onClick={handleBooking}
+          >
+            {bookingLoading
+              ? "Creating booking..."
+              : "Confirm Booking"}
+          </button>
+
+        </div>
+      )}
+      {bookingSuccess && (
+        <div>
+          <h2>
+            Booking confirmed! 🎉
+          </h2>
+
+          <p>
+            Your booking has been successfully
+            created.
+          </p>
+
+          <p>
+            Service:{" "}
+            <strong>
+              {selectedService.name}
+            </strong>
+          </p>
+
+          <p>
+            Date:{" "}
+            <strong>
+              {selectedDate}
+            </strong>
+          </p>
+
+          <p>
+            Time:{" "}
+            <strong>
+              {selectedSlot}
+            </strong>
+          </p>
+
+          {bookingSuccess.resource && (
+            <p>
+              Resource:{" "}
+              <strong>
+                {bookingSuccess.resource}
+              </strong>
+            </p>
+          )}
         </div>
       )}
 
