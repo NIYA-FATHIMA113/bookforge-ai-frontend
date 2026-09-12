@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import "./PublicBooking.css";
+
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 
@@ -7,38 +9,25 @@ function PublicBooking() {
   const { slug } = useParams();
 
   const [services, setServices] = useState([]);
-  const [selectedService, setSelectedService] =
-    useState(null);
+  const [selectedService, setSelectedService] = useState(null);
 
   const [selectedDate, setSelectedDate] = useState("");
 
-
   const [slots, setSlots] = useState([]);
-  const [selectedSlot, setSelectedSlot] =
-  useState("");
+  const [selectedSlot, setSelectedSlot] = useState("");
 
-  const [customerName, setCustomerName] =
-  useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
 
-  const [customerPhone, setCustomerPhone] =
-    useState("");
-
-  const [bookingLoading, setBookingLoading] =
-    useState(false);
-
-  const [bookingError, setBookingError] =
-    useState("");
-
-  const [bookingSuccess, setBookingSuccess] =
-    useState(null);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingError, setBookingError] = useState("");
+  const [bookingSuccess, setBookingSuccess] = useState(null);
 
   const [loading, setLoading] = useState(true);
-  const [loadingSlots, setLoadingSlots] =
-      useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const [error, setError] = useState("");
-  const [slotError, setSlotError] =
-    useState("");
+  const [slotError, setSlotError] = useState("");
 
   // --------------------------------
   // Load services
@@ -88,6 +77,7 @@ function PublicBooking() {
         setLoadingSlots(true);
         setSlotError("");
         setSlots([]);
+        setSelectedSlot("");
 
         const response = await fetch(
           `${API_BASE_URL}/api/book/${slug}/available-slots/?date=${selectedDate}&service=${selectedService.id}`
@@ -114,33 +104,10 @@ function PublicBooking() {
   }, [slug, selectedService, selectedDate]);
 
   // --------------------------------
-  // Loading
+  // Create booking
   // --------------------------------
 
-  if (loading) {
-    return (
-      <div className="public-booking">
-        <p>Loading booking options...</p>
-      </div>
-    );
-  }
-
-  // --------------------------------
-  // Error
-  // --------------------------------
-
-  if (error) {
-    return (
-      <div className="public-booking">
-        <p>{error}</p>
-      </div>
-    );
-  }
-
-  // --------------------------------
-  // Page
-  // --------------------------------
-    const handleBooking = async () => {
+  const handleBooking = async () => {
     setBookingError("");
     setBookingSuccess(null);
 
@@ -188,8 +155,7 @@ function PublicBooking() {
           method: "POST",
 
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
 
           body: JSON.stringify({
@@ -222,7 +188,6 @@ function PublicBooking() {
       }
 
       setBookingSuccess(data);
-
     } catch (error) {
       setBookingError(
         error.message
@@ -231,8 +196,127 @@ function PublicBooking() {
       setBookingLoading(false);
     }
   };
+
+  // --------------------------------
+  // Booking progress
+  // --------------------------------
+
+  let currentStep = 1;
+
+  if (selectedService) {
+    currentStep = 2;
+  }
+
+  if (selectedDate) {
+    currentStep = 3;
+  }
+
+  if (selectedSlot) {
+    currentStep = 4;
+  }
+
+  if (bookingSuccess) {
+    currentStep = 5;
+  }
+
+  // --------------------------------
+  // Loading
+  // --------------------------------
+
+  if (loading) {
+    return (
+      <div className="public-booking">
+        <p>
+          Loading booking options...
+        </p>
+      </div>
+    );
+  }
+
+  // --------------------------------
+  // Error
+  // --------------------------------
+
+  if (error) {
+    return (
+      <div className="public-booking">
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  // --------------------------------
+  // Page
+  // --------------------------------
+
   return (
     <div className="public-booking">
+
+      {/* Progress */}
+
+      <div className="booking-progress">
+
+        <span
+          className={
+            currentStep === 1
+              ? "active-step"
+              : ""
+          }
+        >
+          1. Service
+        </span>
+
+        <span>→</span>
+
+        <span
+          className={
+            currentStep === 2
+              ? "active-step"
+              : ""
+          }
+        >
+          2. Date
+        </span>
+
+        <span>→</span>
+
+        <span
+          className={
+            currentStep === 3
+              ? "active-step"
+              : ""
+          }
+        >
+          3. Available Slots
+        </span>
+
+        <span>→</span>
+
+        <span
+          className={
+            currentStep === 4
+              ? "active-step"
+              : ""
+          }
+        >
+          4. Customer Details
+        </span>
+
+        <span>→</span>
+
+        <span
+          className={
+            currentStep === 5
+              ? "active-step"
+              : ""
+          }
+        >
+          5. Confirmation
+        </span>
+
+      </div>
+
+      {/* Business title */}
 
       <h1>
         Book at{" "}
@@ -240,274 +324,336 @@ function PublicBooking() {
           slug.slice(1)}
       </h1>
 
-      <h2>Choose a service</h2>
+      {/* Booking success */}
 
-      {services.length === 0 ? (
-        <p>No services available.</p>
-      ) : (
-        <div className="services-list">
+      {bookingSuccess ? (
+  <div className="booking-confirmation">
 
-          {services.map((service) => (
-            <div
+    <div className="confirmation-icon">
+      ✓
+    </div>
+
+    <h2>
+      Booking Confirmed!
+    </h2>
+
+    <p className="confirmation-message">
+      Your booking has been successfully
+      created.
+    </p>
+
+    <div className="confirmation-card">
+
+      <div className="confirmation-row">
+        <span>Service</span>
+        <strong>
+          {selectedService?.name}
+        </strong>
+      </div>
+
+      <div className="confirmation-row">
+        <span>Date</span>
+        <strong>
+          {selectedDate}
+        </strong>
+      </div>
+
+      <div className="confirmation-row">
+        <span>Time</span>
+        <strong>
+          {selectedSlot}
+        </strong>
+      </div>
+
+      <div className="confirmation-row">
+        <span>Name</span>
+        <strong>
+          {customerName}
+        </strong>
+      </div>
+
+      <div className="confirmation-row">
+        <span>Phone</span>
+        <strong>
+          {customerPhone}
+        </strong>
+      </div>
+
+      {bookingSuccess.resource && (
+        <div className="confirmation-row">
+          <span>Resource</span>
+          <strong>
+            {typeof bookingSuccess.resource ===
+            "object"
+              ? bookingSuccess.resource.name
+              : bookingSuccess.resource}
+          </strong>
+        </div>
+      )}
+
+    </div>
+
+    <p className="confirmation-note">
+      Please arrive on time for your booking.
+    </p>
+
+  </div>
+) : (
+        <>
+          {/* Services */}
+
+          <section className="booking-section">
+
+            <h2>
+              1. Select a service
+            </h2>
+
+            {services.length === 0 ? (
+              <p>
+                No services available.
+              </p>
+            ) : (
+              <div className="services-list">
+
+                {services.map((service) => (
+            <button
               key={service.id}
-              className="service-card"
+              type="button"
+              className={
+                selectedService?.id === service.id
+                  ? "service-card selected-service"
+                  : "service-card"
+              }
+              onClick={() => {
+                setSelectedService(service);
+                setSelectedDate("");
+                setSelectedSlot("");
+                setBookingError("");
+              }}
             >
-              <h3>{service.name}</h3>
+              <div className="service-card-content">
 
-              <p>
-                ₹{service.price}
-              </p>
+                <div>
+                  <h3>{service.name}</h3>
 
-              <p>
-                {service.duration} minutes
-              </p>
+                  <p>
+                    {service.duration} minutes
+                  </p>
+                </div>
+
+                <div className="service-price">
+                  ₹{service.price}
+                </div>
+
+              </div>
+            </button>
+          ))}
+
+              </div>
+            )}
+
+          </section>
+
+          {/* Date */}
+
+          {selectedService && (
+            <section className="booking-section">
+
+              <h2>
+                2. Select a date
+              </h2>
+
+              <input
+                type="date"
+                value={selectedDate}
+                min={
+                  new Date()
+                    .toISOString()
+                    .split("T")[0]
+                }
+                onChange={(e) => {
+                  setSelectedDate(
+                    e.target.value
+                  );
+                  setSelectedSlot("");
+                  setBookingError("");
+                }}
+              />
+
+            </section>
+          )}
+
+          {/* Available slots */}
+
+          {selectedService &&
+            selectedDate && (
+              <section className="booking-section">
+
+                <h2>
+                  3. Available slots
+                </h2>
+
+                {loadingSlots && (
+                  <p>
+                    Loading available slots...
+                  </p>
+                )}
+
+                {slotError && (
+                  <p className="booking-error">
+                    {slotError}
+                  </p>
+                )}
+
+                {!loadingSlots &&
+                  !slotError &&
+                  slots.length === 0 && (
+                    <p>
+                      No slots available
+                      for this date.
+                    </p>
+                  )}
+
+                {!loadingSlots &&
+                  slots.length > 0 && (
+                   <div className="slots-container">
+
+  <p className="slots-subtitle">
+    Choose an available time
+  </p>
+
+  <div className="slots-list">
+
+    {slots.map((slot) => (
+      <button
+        key={slot}
+        type="button"
+        className={
+          selectedSlot === slot
+            ? "slot-button selected-slot"
+            : "slot-button"
+        }
+        onClick={() => {
+          setSelectedSlot(slot);
+          setBookingError("");
+        }}
+      >
+        {slot}
+      </button>
+    ))}
+
+  </div>
+
+  {selectedSlot && (
+    <p className="selected-slot-text">
+      Selected time: <strong>{selectedSlot}</strong>
+    </p>
+  )}
+
+</div>
+                  )}
+
+              </section>
+            )}
+
+          {/* Customer details */}
+
+          {selectedSlot && (
+            <section className="booking-section">
+
+              <h2>
+                4. Customer Details
+              </h2>
+
+              <div className="customer-form">
+
+              <div className="form-field">
+                <label htmlFor="customer-name">
+                  Full Name
+                </label>
+
+                <input
+                  id="customer-name"
+                  type="text"
+                  value={customerName}
+                  onChange={(e) =>
+                    setCustomerName(e.target.value)
+                  }
+                  placeholder="Enter your full name"
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="customer-phone">
+                  Phone Number
+                </label>
+
+                <input
+                  id="customer-phone"
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) =>
+                    setCustomerPhone(e.target.value)
+                  }
+                  placeholder="Enter your phone number"
+                />
+              </div>
+
+          </div>
+              <div className="booking-summary">
+
+              <h3>Booking Summary</h3>
+
+              <div className="summary-row">
+                <span>Service</span>
+                <strong>{selectedService?.name}</strong>
+              </div>
+
+              <div className="summary-row">
+                <span>Price</span>
+                <strong>₹{selectedService?.price}</strong>
+              </div>
+
+              <div className="summary-row">
+                <span>Duration</span>
+                <strong>
+                  {selectedService?.duration} minutes
+                </strong>
+              </div>
+
+              <div className="summary-row">
+                <span>Date</span>
+                <strong>{selectedDate}</strong>
+              </div>
+
+              <div className="summary-row">
+                <span>Time</span>
+                <strong>{selectedSlot}</strong>
+              </div>
+
+            </div>
+
+
+              {bookingError && (
+                <p className="booking-error">
+                  {bookingError}
+                </p>
+              )}
 
               <button
                 type="button"
-                onClick={() => {
-                    setSelectedService(service);
-                    setSelectedDate("");
-                    setSelectedSlot("");
-                    setSlots([]);
-                    setSlotError("");
-                    }}
+                onClick={handleBooking}
+                disabled={bookingLoading}
               >
-                {selectedService?.id === service.id
-                  ? "Selected"
-                  : "Select"}
+                {bookingLoading
+                  ? "Booking..."
+                  : "Confirm Booking"}
               </button>
-            </div>
-          ))}
 
-        </div>
-      )}
-
-      {/* --------------------------------
-          Date selection
-      -------------------------------- */}
-
-      {selectedService && (
-        <div className="date-section">
-
-          <h2>
-            Choose a date
-          </h2>
-
-          <p>
-            Service:{" "}
-            <strong>
-              {selectedService.name}
-            </strong>
-          </p>
-
-          <p>
-            Duration:{" "}
-            <strong>
-              {selectedService.duration} minutes
-            </strong>
-          </p>
-
-          <p>
-            Price:{" "}
-            <strong>
-              ₹{selectedService.price}
-            </strong>
-          </p>
-
-          <input
-            type="date"
-            value={selectedDate}
-            min={
-              new Date()
-                .toISOString()
-                .split("T")[0]
-            }
-            max={
-              new Date(
-                Date.now() +
-                  30 *
-                    24 *
-                    60 *
-                    60 *
-                    1000
-              )
-                .toISOString()
-                .split("T")[0]
-            }
-            onChange={(e) => {
-                setSelectedDate(e.target.value);
-                setSelectedSlot("");
-                }}
-          />
-
-        </div>
-      )}
-
-      {/* --------------------------------
-          Available slots
-      -------------------------------- */}
-
-      {selectedDate && selectedService && (
-        <div className="slots-section">
-
-          <h2>
-            Available slots
-          </h2>
-
-          {loadingSlots && (
-            <p>
-              Checking availability...
-            </p>
+            </section>
           )}
 
-          {slotError && (
-            <p>
-              {slotError}
-            </p>
-          )}
-
-          {!loadingSlots &&
-            !slotError &&
-            slots.length === 0 && (
-              <p>
-                No slots available for this
-                date.
-              </p>
-            )}
-
-          {!loadingSlots &&
-            slots.length > 0 && (
-                <div className="slots-list">
-
-                {slots.map((slot) => (
-                    <button
-                        key={slot}
-                        type="button"
-                        style={{
-                            padding: "10px 18px",
-                            margin: "5px",
-                            border: "1px solid black",
-                            borderRadius: "6px",
-                            background:
-                            selectedSlot === slot
-                                ? "black"
-                                : "white",
-                            color:
-                            selectedSlot === slot
-                                ? "white"
-                                : "black",
-                            cursor: "pointer",
-                        }}
-                        onClick={() => {
-                            console.log("SLOT CLICKED:", slot);
-                            setSelectedSlot(slot);
-                        }}
-                        >
-                        {slot}
-                        </button>
-                ))}
-
-                </div>
-            )}
-
-            {selectedSlot && (
-            <p>
-                Selected time:{" "}
-                <strong>{selectedSlot}</strong>
-            </p>
-            )}
-
-        </div>
-      )}
-
-      {selectedSlot && (
-        <div className="customer-section">
-
-          <h2>Customer details</h2>
-
-          <div>
-            <label>Name</label>
-
-            <input
-              type="text"
-              placeholder="Enter your name"
-              value={customerName}
-              onChange={(e) =>
-                setCustomerName(e.target.value)
-              }
-            />
-          </div>
-
-          <div>
-            <label>Phone number</label>
-
-            <input
-              type="tel"
-              placeholder="Enter your phone number"
-              value={customerPhone}
-              onChange={(e) =>
-                setCustomerPhone(e.target.value)
-              }
-            />
-          </div>
-
-          {bookingError && (
-            <p>{bookingError}</p>
-          )}
-
-          <button
-            type="button"
-            disabled={bookingLoading}
-            onClick={handleBooking}
-          >
-            {bookingLoading
-              ? "Creating booking..."
-              : "Confirm Booking"}
-          </button>
-
-        </div>
-      )}
-      {bookingSuccess && (
-        <div>
-          <h2>
-            Booking confirmed! 🎉
-          </h2>
-
-          <p>
-            Your booking has been successfully
-            created.
-          </p>
-
-          <p>
-            Service:{" "}
-            <strong>
-              {selectedService.name}
-            </strong>
-          </p>
-
-          <p>
-            Date:{" "}
-            <strong>
-              {selectedDate}
-            </strong>
-          </p>
-
-          <p>
-            Time:{" "}
-            <strong>
-              {selectedSlot}
-            </strong>
-          </p>
-
-          {bookingSuccess.resource && (
-            <p>
-              Resource:{" "}
-              <strong>
-                {bookingSuccess.resource}
-              </strong>
-            </p>
-          )}
-        </div>
+        </>
       )}
 
     </div>

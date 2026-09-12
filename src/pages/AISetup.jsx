@@ -183,14 +183,25 @@ function AISetup() {
         );
       }
 
-      // Only show preview when backend says setup is complete
-      if (
-        config.configuration_status
-          ?.is_complete ||
-        config.is_complete
-      ) {
-        setShowPreview(true);
-      }
+      // Show preview when the AI has completed the setup.
+// Supports both the backend completion flag and the
+// final confirmation message from the AI.
+
+const completionMessage =
+  data.message?.toLowerCase() || "";
+
+const setupComplete =
+  config.configuration_status?.is_complete === true ||
+  config.is_complete === true ||
+  data.is_complete === true ||
+  completionMessage.includes("ready for confirmation") ||
+  completionMessage.includes("ready to create your business") ||
+  completionMessage.includes("all the information needed") ||
+  completionMessage.includes("configuration is ready");
+
+if (setupComplete) {
+  setShowPreview(true);
+}
     }
 
   } catch (error) {

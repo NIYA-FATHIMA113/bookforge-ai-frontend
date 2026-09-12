@@ -161,6 +161,37 @@
   text-align: center;
 }
 
+.booking-details-dialog {
+  width: min(560px, calc(100% - 32px));
+  border: none;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+}
+
+.booking-details-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.booking-details-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.booking-details-dialog-header h2 {
+  margin: 0;
+}
+
+.booking-details-close {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+}
+
 @media (max-width: 700px) {
   .bookings-page {
     padding: 20px;
@@ -178,4 +209,95 @@
   .booking-actions {
     flex-wrap: wrap;
   }
+}
+.booking-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.booking-status select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+.booking-details-panel {
+  margin-top: 24px;
+  padding: 24px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.booking-details-panel h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.booking-details-panel p {
+  margin: 10px 0;
+}
+
+.booking-details-panel button {
+  margin-top: 16px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.booking-status-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.booking-status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.status-pending {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status-confirmed {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-completed {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.status-cancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.booking-status-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.booking-status-actions button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.booking-status-actions button:hover {
+  opacity: 0.85;
 }

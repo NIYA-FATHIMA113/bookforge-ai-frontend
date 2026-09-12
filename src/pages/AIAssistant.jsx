@@ -1,4 +1,8 @@
+import { useState } from "react";
+
 function AIAssistant() {
+  const [businessName, setBusinessName] = useState("");
+
   return (
     <div>
       <h1>Create Your Business with AI</h1>
@@ -9,7 +13,18 @@ function AIAssistant() {
       </p>
 
       <div>
-        <p>AI Assistant will appear here.</p>
+        <label>
+          What is your business name?
+        </label>
+
+        <input
+          type="text"
+          value={businessName}
+          onChange={(e) =>
+            setBusinessName(e.target.value)
+          }
+          placeholder="Enter your business name"
+        />
       </div>
     </div>
   );

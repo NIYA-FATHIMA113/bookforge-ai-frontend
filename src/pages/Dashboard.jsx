@@ -4,6 +4,8 @@ import { NavLink } from "react-router-dom";
 import BusinessList from "../components/BusinessList";
 import { apiRequest } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import RecentBookings from "../components/RecentBookings";
+import "./Dashboard.css";
 
 function Dashboard() {
   const { logout } = useAuth();
@@ -67,46 +69,61 @@ function Dashboard() {
 
         <h2>BookForge AI</h2>
 
-        <nav>
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              isActive ? "active" : ""
-            }
-          >
-            Dashboard
-          </NavLink>
+       <nav>
+  <NavLink
+    to="/dashboard"
+    className={({ isActive }) =>
+      isActive ? "active" : ""
+    }
+  >
+    Dashboard
+  </NavLink>
 
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              isActive ? "active" : ""
-            }
-          >
-            Businesses
-          </NavLink>
+  <NavLink
+  to="/dashboard/businesses"
+  className={({ isActive }) =>
+    isActive ? "active" : ""
+  }
+>
+  Businesses
+</NavLink>
 
-          <NavLink to="/dashboard">
-            Services
-          </NavLink>
+  <NavLink
+    to="/dashboard/services"
+    className={({ isActive }) =>
+      isActive ? "active" : ""
+    }
+  >
+    Services
+  </NavLink>
 
-          <NavLink to="/dashboard">
-            Resources
-          </NavLink>
+  <NavLink
+      to="/dashboard/resources"
+      className={({ isActive }) =>
+        isActive ? "active" : ""
+      }
+    >
+      Resources
+    </NavLink>
 
-          <NavLink
-            to="/dashboard/bookings"
-            className={({ isActive }) =>
-              isActive ? "active" : ""
-            }
-          >
-            Bookings
-          </NavLink>
+  <NavLink
+    to="/dashboard/bookings"
+    className={({ isActive }) =>
+      isActive ? "active" : ""
+    }
+  >
+    Bookings
+  </NavLink>
 
-          <NavLink to="/dashboard">
-            Business Hours
-          </NavLink>
-        </nav>
+ <NavLink
+  to="/dashboard/hours"
+  className={({ isActive }) =>
+    isActive ? "active" : ""
+  }
+>
+  Business Hours
+</NavLink>
+</nav>
 
         <button onClick={logout}>
           Logout
@@ -184,6 +201,54 @@ function Dashboard() {
           </div>
 
         </section>
+        {/* Quick Actions */}
+<section className="quick-actions">
+
+  <div className="section-header">
+    <div>
+      <h2>Quick Actions</h2>
+      <p>Manage your booking platform quickly.</p>
+    </div>
+  </div>
+
+  <div className="quick-actions-grid">
+
+    <button
+      type="button"
+      onClick={() => navigate("/dashboard/services")}
+    >
+      <strong>+ Add Service</strong>
+      <span>Create a new service</span>
+    </button>
+
+    <button
+      type="button"
+      onClick={() => navigate("/dashboard/resources")}
+    >
+      <strong>+ Add Resource</strong>
+      <span>Add a bookable resource</span>
+    </button>
+
+    <button
+      type="button"
+      onClick={() => navigate("/dashboard/bookings")}
+    >
+      <strong>View Bookings</strong>
+      <span>Manage customer bookings</span>
+    </button>
+
+    <button
+      type="button"
+      onClick={() => navigate("/dashboard/hours")}
+    >
+      <strong>Business Hours</strong>
+      <span>Manage your availability</span>
+    </button>
+
+  </div>
+
+</section>
+        <RecentBookings />
 
       </main>
     </div>

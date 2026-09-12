@@ -13,6 +13,9 @@ import AISetup from "./pages/AISetup";
 import { useAuth } from "./context/AuthContext";
 import PublicBooking from "./pages/PublicBooking";
 import Bookings from "./pages/Bookings";
+import Services from "./pages/Services";
+import Resources from "./pages/Resources";
+import BusinessHoursPage from "./pages/BusinessHoursPage";
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -97,6 +100,25 @@ function App() {
           )
         }
       />
+      <Route
+        path="/dashboard/services"
+        element={<Services />}
+      />
+      <Route
+        path="/dashboard/resources"
+        element={<Resources />}
+      />
+     <Route
+  path="/dashboard/hours"
+  element={
+    isAuthenticated ? (
+      <BusinessHoursPage />
+    ) : (
+      <Navigate to="/" replace />
+    )
+  }
+/>
+
       </Routes>
     </BrowserRouter>
   );
