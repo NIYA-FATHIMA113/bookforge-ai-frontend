@@ -1,320 +1,114 @@
 import { useEffect, useState } from "react";
+import OwnerNavigation from "../components/OwnerNavigation";
 import { apiRequest } from "../services/api";
 import "./Resources.css";
 
 function Resources() {
-  const [services, setServices] = useState([]);
-  const [selectedService, setSelectedService] =
-    useState(null);
-
+  const [businesses, setBusinesses] = useState([]);
+  const [tenantId, setTenantId] = useState("");
   const [resources, setResources] = useState([]);
-
+  const [name, setName] = useState("");
+  const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const [showForm, setShowForm] = useState(false);
-  const [resourceName, setResourceName] =
-    useState("");
-
-  const [saving, setSaving] = useState(false);
+  const loadResources = async (id) => {
+    if (!id) return setResources([]);
+    const data = await apiRequest(`/api/tenants/${id}/resources/`);
+    setResources(data.results || data);
+  };
 
   useEffect(() => {
-    loadServices();
+    async function load() {
+      try {
+        const data = await apiRequest("/api/tenants/");
+        const tenantList = data.results || data;
+        setBusinesses(tenantList);
+        const firstId = tenantList[0]?.id;
+        if (firstId) {
+          setTenantId(String(firstId));
+          await loadResources(firstId);
+        }
+      } catch (err) {
+        setError(err.message || "Failed to load resources.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
-  const loadServices = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const businessData =
-        await apiRequest("/api/tenants/");
-
-      const businesses =
-        businessData.results || businessData;
-
-      if (businesses.length === 0) {
-        setServices([]);
-        return;
-      }
-
-      const tenantId = businesses[0].id;
-
-      const serviceData =
-        await apiRequest(
-          `/api/tenants/${tenantId}/services/`
-        );
-
-      const serviceList =
-        serviceData.results || serviceData;
-
-      setServices(serviceList);
-
-      if (serviceList.length > 0) {
-        setSelectedService(serviceList[0]);
-        loadResources(serviceList[0].id);
-      }
-
-    } catch (err) {
-      setError(
-        err.message ||
-          "Failed to load services."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadResources = async (serviceId) => {
+  const changeTenant = async (event) => {
+    const id = event.target.value;
+    setTenantId(id);
+    setEditing(null);
+    setName("");
     try {
       setError("");
-
-      const data = await apiRequest(
-        `/api/services/${serviceId}/resources/`
-      );
-
-      setResources(
-        data.results || data
-      );
-
+      await loadResources(id);
     } catch (err) {
-      setError(
-        err.message ||
-          "Failed to load resources."
-      );
+      setError(err.message || "Failed to load resources.");
     }
   };
 
-  const handleServiceChange = (service) => {
-    setSelectedService(service);
-    setShowForm(false);
-    loadResources(service.id);
-  };
-
-  const handleAddResource = async () => {
-    if (!resourceName.trim()) {
-      alert("Please enter a resource name.");
-      return;
-    }
-
+  const saveResource = async (event) => {
+    event.preventDefault();
+    if (!name.trim() || !tenantId) return;
     try {
       setSaving(true);
       setError("");
-
-      await apiRequest(
-        `/api/services/${selectedService.id}/resources/`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            name: resourceName.trim(),
-          }),
-        }
-      );
-
-      setResourceName("");
-      setShowForm(false);
-
-      await loadResources(
-        selectedService.id
-      );
-
+      const saved = editing
+        ? await apiRequest(`/api/resources/${editing.id}/`, { method: "PATCH", body: JSON.stringify({ name: name.trim() }) })
+        : await apiRequest(`/api/tenants/${tenantId}/resources/`, { method: "POST", body: JSON.stringify({ name: name.trim() }) });
+      setResources((current) => editing
+        ? current.map((resource) => resource.id === editing.id ? saved : resource)
+        : [...current, saved]);
+      setName("");
+      setEditing(null);
     } catch (err) {
-      setError(
-        err.message ||
-          "Failed to create resource."
-      );
+      setError(err.message || "Failed to save resource.");
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="resources-page">
-        <h1>Resources</h1>
-        <p>Loading resources...</p>
-      </div>
-    );
-  }
+  const toggleResource = async (resource) => {
+    try {
+      setError("");
+      const saved = await apiRequest(`/api/resources/${resource.id}/`, {
+        method: "PATCH", body: JSON.stringify({ is_active: !resource.is_active }),
+      });
+      setResources((current) => current.map((item) => item.id === resource.id ? saved : item));
+    } catch (err) {
+      setError(err.message || "Failed to update resource.");
+    }
+  };
+
+  if (loading) return <div className="resources-page"><OwnerNavigation /><p>Loading resources…</p></div>;
 
   return (
-    <div className="resources-page">
-
-      <header>
-        <h1>Resources</h1>
-
-        <p>
-          Manage the resources used for your
-          bookings.
-        </p>
-      </header>
-
-      {error && (
-        <p className="resources-error">
-          {error}
-        </p>
-      )}
-
-      {services.length === 0 ? (
-
-        <div className="empty-resources">
-          <h2>No services yet</h2>
-
-          <p>
-            Create a service before adding
-            resources.
-          </p>
-        </div>
-
-      ) : (
-
-        <>
-
-          <div className="resource-service-selector">
-
-            <h2>Select Service</h2>
-
-            <div className="service-selector-list">
-
-              {services.map((service) => (
-                <button
-                  key={service.id}
-                  type="button"
-                  className={
-                    selectedService?.id === service.id
-                      ? "selected-service"
-                      : ""
-                  }
-                  onClick={() =>
-                    handleServiceChange(service)
-                  }
-                >
-                  {service.name}
-                </button>
-              ))}
-
-            </div>
-
-          </div>
-
-          <div className="resources-toolbar">
-
-            <button
-              type="button"
-              onClick={() =>
-                setShowForm(!showForm)
-              }
-            >
-              {showForm
-                ? "Close"
-                : "+ Add Resource"}
-            </button>
-
-          </div>
-
-          {showForm && (
-            <div className="resource-form">
-
-              <h2>
-                Add Resource
-              </h2>
-
-              <div className="form-field">
-
-                <label>
-                  Resource Name
-                </label>
-
-                <input
-                  type="text"
-                  value={resourceName}
-                  onChange={(e) =>
-                    setResourceName(
-                      e.target.value
-                    )
-                  }
-                  placeholder="e.g. Resource 2"
-                />
-
-              </div>
-
-              <div className="resource-form-actions">
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowForm(false);
-                    setResourceName("");
-                  }}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={handleAddResource}
-                >
-                  {saving
-                    ? "Saving..."
-                    : "Save Resource"}
-                </button>
-
-              </div>
-
-            </div>
-          )}
-
-          <div className="resources-list">
-
-            {resources.length === 0 ? (
-
-              <div className="empty-resources">
-
-                <h2>
-                  No resources yet
-                </h2>
-
-                <p>
-                  Add a resource for{" "}
-                  <strong>
-                    {selectedService?.name}
-                  </strong>.
-                </p>
-
-              </div>
-
-            ) : (
-
-              resources.map((resource) => (
-
-                <article
-                  className="resource-card"
-                  key={resource.id}
-                >
-
-                  <h3>
-                    {resource.name}
-                  </h3>
-
-                  <button
-                    type="button"
-                  >
-                    Delete
-                  </button>
-
-                </article>
-
-              ))
-
-            )}
-
-          </div>
-
-        </>
-
-      )}
-
+    <div className="resources-page owner-page">
+      <OwnerNavigation />
+      <header><h1>Resources</h1><p>Physical resources are shared by every service in this business.</p></header>
+      {error && <p className="resources-error">{error}</p>}
+      {!businesses.length ? <div className="empty-resources"><h2>No business yet</h2><p>Create a business before adding resources.</p></div> : <>
+        <label className="business-selector">Business
+          <select value={tenantId} onChange={changeTenant}>{businesses.map((business) => <option key={business.id} value={business.id}>{business.business_name}</option>)}</select>
+        </label>
+        <form className="resource-form" onSubmit={saveResource}>
+          <h2>{editing ? "Edit resource" : "Add resource"}</h2>
+          <input value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Pitch 1" required />
+          <button disabled={saving}>{saving ? "Saving…" : editing ? "Update" : "Add resource"}</button>
+          {editing && <button type="button" onClick={() => { setEditing(null); setName(""); }}>Cancel</button>}
+        </form>
+        {!resources.length ? <div className="empty-resources"><h2>No resources yet</h2><p>Add a pitch, room, table, or other bookable resource.</p></div> : <div className="resources-list">
+          {resources.map((resource) => <article className="resource-card" key={resource.id}>
+            <div><h3>{resource.name}</h3><span className={resource.is_active ? "resource-active" : "resource-inactive"}>{resource.is_active ? "Active" : "Inactive"}</span></div>
+            <div className="resource-actions"><button type="button" onClick={() => { setEditing(resource); setName(resource.name); }}>Edit</button><button type="button" onClick={() => toggleResource(resource)}>{resource.is_active ? "Deactivate" : "Activate"}</button></div>
+          </article>)}
+        </div>}
+      </>}
     </div>
   );
 }

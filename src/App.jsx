@@ -102,11 +102,15 @@ function App() {
       />
       <Route
         path="/dashboard/services"
-        element={<Services />}
+        element={
+          isAuthenticated ? <Services /> : <Navigate to="/" replace />
+        }
       />
       <Route
         path="/dashboard/resources"
-        element={<Resources />}
+        element={
+          isAuthenticated ? <Resources /> : <Navigate to="/" replace />
+        }
       />
      <Route
   path="/dashboard/hours"
