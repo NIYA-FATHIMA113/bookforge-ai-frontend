@@ -301,3 +301,23 @@
 .booking-status-actions button:hover {
   opacity: 0.85;
 }
+.booking-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.booking-filters input,
+.booking-filters select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.booking-filters button {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}

@@ -3,6 +3,13 @@ import { apiRequest } from "../services/api";
 import "./Bookings.css";
 
 function Bookings() {
+    const [filters, setFilters] = useState({
+    date: "",
+    customer: "",
+    service: "",
+    status: "",
+    resource: "",
+  });
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -13,26 +20,58 @@ function Bookings() {
   // Fetch bookings
   // --------------------------------
 
-  const fetchBookings = async () => {
-    try {
-      setLoading(true);
-      setError("");
+ const fetchBookings = async () => {
+  try {
+    setLoading(true);
+    setError("");
 
-      const data = await apiRequest("/api/bookings/");
+    const params = new URLSearchParams();
 
-      setBookings(data.results || data);
-    } catch (err) {
-      setError(
-        err.message || "Failed to load bookings."
-      );
-    } finally {
-      setLoading(false);
+    if (filters.date) {
+      params.append("date", filters.date);
     }
-  };
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
+    if (filters.customer) {
+      params.append("customer", filters.customer);
+    }
+
+    if (filters.service) {
+      params.append("service", filters.service);
+    }
+
+    if (filters.status) {
+      params.append("status", filters.status);
+    }
+
+    if (filters.resource) {
+      params.append("resource", filters.resource);
+    }
+
+    const queryString = params.toString();
+
+    const data = await apiRequest(
+      `/api/bookings/${queryString ? `?${queryString}` : ""}`
+    );
+
+    setBookings(data.results || data);
+  } catch (err) {
+    setError(
+      err.message || "Failed to load bookings."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
+    useEffect(() => {
+  fetchBookings();
+}, [
+  filters.date,
+  filters.customer,
+  filters.service,
+  filters.status,
+  filters.resource,
+]);
 
   // --------------------------------
   // Update booking status
@@ -169,6 +208,87 @@ function Bookings() {
         <p>
           Manage bookings made by your customers.
         </p>
+              <div className="booking-filters">
+
+        <input
+          type="date"
+          value={filters.date}
+          onChange={(e) =>
+            setFilters({
+              ...filters,
+              date: e.target.value,
+            })
+          }
+        />
+
+        <input
+          type="text"
+          placeholder="Customer name"
+          value={filters.customer}
+          onChange={(e) =>
+            setFilters({
+              ...filters,
+              customer: e.target.value,
+            })
+          }
+        />
+
+        <input
+          type="text"
+          placeholder="Service"
+          value={filters.service}
+          onChange={(e) =>
+            setFilters({
+              ...filters,
+              service: e.target.value,
+            })
+          }
+        />
+
+        <select
+          value={filters.status}
+          onChange={(e) =>
+            setFilters({
+              ...filters,
+              status: e.target.value,
+            })
+          }
+        >
+          <option value="">All statuses</option>
+          <option value="PENDING">Pending</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+
+        <input
+          type="text"
+          placeholder="Resource"
+          value={filters.resource}
+          onChange={(e) =>
+            setFilters({
+              ...filters,
+              resource: e.target.value,
+            })
+          }
+        />
+
+        <button
+          type="button"
+          onClick={() =>
+            setFilters({
+              date: "",
+              customer: "",
+              service: "",
+              status: "",
+              resource: "",
+            })
+          }
+        >
+          Clear Filters
+        </button>
+
+      </div>
 
       </header>
 

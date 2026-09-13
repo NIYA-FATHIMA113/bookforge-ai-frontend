@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../services/api";
 import BusinessHours from "../components/BusinessHours";
+import OwnerNavigation from "../components/OwnerNavigation";
 
 function BusinessHoursPage() {
   const [tenantId, setTenantId] = useState(null);
@@ -65,16 +66,12 @@ function BusinessHoursPage() {
   }
 
   return (
-    <div className="business-hours-page">
-      <h1>Business Hours</h1>
+  <>
+    <OwnerNavigation />
 
-      <p>
-        Set the opening and closing hours for your business.
-      </p>
-
-      <BusinessHours tenantId={tenantId} />
-    </div>
-  );
+    <BusinessHours tenantId={tenantId} />
+  </>
+);
 }
 
 export default BusinessHoursPage;

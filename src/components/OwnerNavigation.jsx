@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-
+import "./OwnerNavigation.css";
 function OwnerNavigation() {
   const { logout } = useAuth();
   const navigate = useNavigate();
