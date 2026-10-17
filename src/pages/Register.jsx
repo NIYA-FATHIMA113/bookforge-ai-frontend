@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
+import "./Auth.css";
 
 function Register() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ function Register() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleChange(e) {
     setForm({
@@ -53,58 +55,94 @@ function Register() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <h1>Create your account</h1>
+    <main className="auth-page">
+      <section className="auth-card" aria-labelledby="register-title">
+        <div className="auth-brand">
+          <span className="auth-brand-mark">B</span>
+          <span>BookForge <span>AI</span></span>
+        </div>
 
-        <p>
-          Start building your business with BookForge AI.
-        </p>
+        <div className="auth-heading">
+          <p className="auth-eyebrow">GET STARTED</p>
+          <h1 id="register-title">Create your account</h1>
+          <p>Set up your workspace and start taking bookings.</p>
+        </div>
 
         {error && (
-          <p className="error-message">
+          <p className="auth-error" role="alert">
             {error}
           </p>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={form.username}
-            onChange={handleChange}
-            required
-          />
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <label htmlFor="register-username">Username</label>
+            <input
+              id="register-username"
+              type="text"
+              name="username"
+              autoComplete="username"
+              placeholder="Choose a username"
+              value={form.username}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
+          <div className="auth-field">
+            <label htmlFor="register-email">Email</label>
+            <input
+              id="register-email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
+          <div className="auth-field">
+            <label htmlFor="register-password">Password</label>
+            <div className="auth-password-wrap">
+              <input
+                id="register-password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                autoComplete="new-password"
+                placeholder="Create a password"
+                value={form.password}
+                onChange={handleChange}
+                required
+              />
+              <button
+                className="auth-password-toggle"
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? "Hide passwords" : "Show passwords"}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+          </div>
 
-          <input
-            type="password"
-            name="password2"
-            placeholder="Confirm password"
-            value={form.password2}
-            onChange={handleChange}
-            required
-          />
+          <div className="auth-field">
+            <label htmlFor="register-password-confirm">Confirm password</label>
+            <input
+              id="register-password-confirm"
+              type={showPassword ? "text" : "password"}
+              name="password2"
+              autoComplete="new-password"
+              placeholder="Enter your password again"
+              value={form.password2}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
           <button
+            className="auth-submit"
             type="submit"
             disabled={loading}
           >
@@ -114,17 +152,13 @@ function Register() {
           </button>
         </form>
 
-        <p>
+        <p className="auth-footer">
           Already have an account?{" "}
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-          >
-            Login
-          </button>
+          <button className="auth-inline-link" type="button" onClick={() => navigate("/")}>Sign in</button>
         </p>
-      </div>
-    </div>
+      </section>
+      <p className="auth-note">A simpler way to run your bookings.</p>
+    </main>
   );
 }
 

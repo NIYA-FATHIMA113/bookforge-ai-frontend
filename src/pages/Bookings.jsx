@@ -328,10 +328,12 @@ function Bookings() {
               {/* Card Header */}
 
               <div className="booking-card-header">
-
-                <h2>
-                  {booking.customer_name}
-                </h2>
+                <div className="booking-card-title">
+                  <h2>{booking.customer_name}</h2>
+                  <span className="booking-business-name">
+                    {booking.tenant?.business_name || "Business unavailable"}
+                  </span>
+                </div>
 
                 {/* Status */}
 
@@ -576,6 +578,11 @@ function Bookings() {
           <p>
             <strong>Customer:</strong>{" "}
             {selectedBooking.customer_name}
+          </p>
+
+          <p>
+            <strong>Business:</strong>{" "}
+            {selectedBooking.tenant?.business_name || "Business unavailable"}
           </p>
 
           <p>

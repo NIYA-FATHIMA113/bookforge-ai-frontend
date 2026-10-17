@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../services/api";
+import "./BusinessHours.css";
 
 const DAYS = [
   { value: 0, label: "Monday" },

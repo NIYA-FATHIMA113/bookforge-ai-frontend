@@ -9,65 +9,31 @@ function AISetup() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [websiteStyle, setWebsiteStyle] = useState("auto");
 
  
   const [business, setBusiness] = useState({
-    name: "Niya Beauty Salon",
-    type: "Beauty Salon",
-    location: "Calicut",
+    name: "",
+    type: "",
+    location: "",
     phone: "",
     email: "",
   });
   const [conversationId, setConversationId] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
-  const [services, setServices] = useState([
-    {
-      id: 1,
-      name: "Haircut",
-      duration: 30,
-      price: 300,
-    },
-    {
-      id: 2,
-      name: "Hair Spa",
-      duration: 60,
-      price: 1200,
-    },
-    {
-      id: 3,
-      name: "Facial",
-      duration: 45,
-      price: 900,
-    },
-  ]);
-
-  const [resources, setResources] = useState([
-    {
-      id: 1,
-      name: "Hair Styling Chair 1",
-    },
-    {
-      id: 2,
-      name: "Hair Styling Chair 2",
-    },
-    {
-      id: 3,
-      name: "Facial Room",
-    },
-  ]);
+  const [services, setServices] = useState([]);
+  const [resources, setResources] = useState([]);
 
   const [hours, setHours] = useState({
-    days: "Monday - Saturday",
-    opening: "09:00",
-    closing: "19:00",
-    sundayClosed: true,
+    days: "",
+    opening: "",
+    closing: "",
+    sundayClosed: false,
   });
 
   const [bookingRules, setBookingRules] = useState({
-    deposit: "No deposit",
-    advanceNotice: "1 hour",
-    cancellation:
-      "Customers can cancel before the appointment.",
+    deposit: "",
+    bookingLength: "",
   });
 
 
@@ -144,7 +110,12 @@ function AISetup() {
       }));
 
       if (config.services) {
-        setServices(config.services);
+        setServices(config.services.map((service, index) => ({
+          id: service.id || index + 1,
+          name: service.name,
+          duration: service.duration_minutes || 60,
+          price: service.price ?? 0,
+        })));
       }
 
       if (
@@ -155,10 +126,10 @@ function AISetup() {
         setHours((current) => ({
           ...current,
           opening:
-            config.opening_time ||
+            config.opening_time?.slice(0, 5) ||
             current.opening,
           closing:
-            config.closing_time ||
+            config.closing_time?.slice(0, 5) ||
             current.closing,
           days:
             config.working_days?.join(
@@ -182,6 +153,10 @@ function AISetup() {
           )
         );
       }
+      setBookingRules({
+        deposit: config.booking_deposit ?? "No deposit",
+        bookingLength: config.booking_length_minutes ?? "",
+      });
 
       // Show preview when the AI has completed the setup.
 // Supports both the backend completion flag and the
@@ -236,17 +211,14 @@ const handleConfirm = async () => {
       method: "POST",
       body: JSON.stringify({
         conversation_id: conversationId,
+        website_style: websiteStyle,
       }),
     });
 
     setConversationId(response.conversation_id);
     console.log("BUSINESS CREATED:", response);
 
-    alert(
-      `${response.business_name} created successfully!`
-    );
-
-    navigate("/dashboard");
+    navigate(`/book/${response.slug}`);
 
   } catch (error) {
     console.error("Business creation failed:", error);
@@ -440,7 +412,7 @@ const handleConfirm = async () => {
             </div>
 
             <span className="mock-badge">
-              DEMO DATA
+              Live configuration
             </span>
           </div>
 
@@ -456,6 +428,7 @@ const handleConfirm = async () => {
                 Business Name
 
                 <input
+                  readOnly
                   value={business.name}
                   onChange={(e) =>
                     setBusiness({
@@ -470,6 +443,7 @@ const handleConfirm = async () => {
                 Business Type
 
                 <input
+                  readOnly
                   value={business.type}
                   onChange={(e) =>
                     setBusiness({
@@ -484,6 +458,7 @@ const handleConfirm = async () => {
                 Location
 
                 <input
+                  readOnly
                   value={business.location}
                   onChange={(e) =>
                     setBusiness({
@@ -498,6 +473,7 @@ const handleConfirm = async () => {
                 Phone
 
                 <input
+                  readOnly
                   value={business.phone}
                   placeholder="Phone number"
                   onChange={(e) =>
@@ -527,6 +503,7 @@ const handleConfirm = async () => {
 
               <button
                 type="button"
+                disabled
                 onClick={addService}
               >
                 + Add Service
@@ -542,6 +519,7 @@ const handleConfirm = async () => {
                 >
 
                   <input
+                    readOnly
                     value={service.name}
                     onChange={(e) =>
                       updateService(
@@ -553,6 +531,7 @@ const handleConfirm = async () => {
                   />
 
                   <input
+                    readOnly
                     type="number"
                     min="1"
                     value={service.duration}
@@ -566,6 +545,7 @@ const handleConfirm = async () => {
                   />
 
                   <input
+                    readOnly
                     type="number"
                     min="0"
                     value={service.price}
@@ -580,6 +560,7 @@ const handleConfirm = async () => {
 
                   <button
                     type="button"
+                    disabled
                     onClick={() =>
                       removeService(service.id)
                     }
@@ -617,6 +598,7 @@ const handleConfirm = async () => {
 
               <button
                 type="button"
+                disabled
                 onClick={addResource}
               >
                 + Add Resource
@@ -631,6 +613,7 @@ const handleConfirm = async () => {
               >
 
                 <input
+                  readOnly
                   value={resource.name}
                   onChange={(e) =>
                     updateResource(
@@ -642,6 +625,7 @@ const handleConfirm = async () => {
 
                 <button
                   type="button"
+                  disabled
                   onClick={() =>
                     removeResource(resource.id)
                   }
@@ -666,6 +650,7 @@ const handleConfirm = async () => {
                 Working Days
 
                 <input
+                  readOnly
                   value={hours.days}
                   onChange={(e) =>
                     setHours({
@@ -680,6 +665,7 @@ const handleConfirm = async () => {
                 Opening Time
 
                 <input
+                  readOnly
                   type="time"
                   value={hours.opening}
                   onChange={(e) =>
@@ -695,6 +681,7 @@ const handleConfirm = async () => {
                 Closing Time
 
                 <input
+                  readOnly
                   type="time"
                   value={hours.closing}
                   onChange={(e) =>
@@ -711,6 +698,7 @@ const handleConfirm = async () => {
             <label className="checkbox-label">
 
               <input
+                disabled
                 type="checkbox"
                 checked={hours.sundayClosed}
                 onChange={(e) =>
@@ -740,6 +728,7 @@ const handleConfirm = async () => {
                 Deposit
 
                 <input
+                  readOnly
                   value={bookingRules.deposit}
                   onChange={(e) =>
                     setBookingRules({
@@ -751,14 +740,15 @@ const handleConfirm = async () => {
               </label>
 
               <label>
-                Minimum Advance Notice
+                Booking Length (minutes)
 
                 <input
-                  value={bookingRules.advanceNotice}
+                  readOnly
+                  value={bookingRules.bookingLength}
                   onChange={(e) =>
                     setBookingRules({
                       ...bookingRules,
-                      advanceNotice:
+                      bookingLength:
                         e.target.value,
                     })
                   }
@@ -768,22 +758,28 @@ const handleConfirm = async () => {
 
             </div>
 
-            <label>
-              Cancellation Policy
+          </div>
 
-              <textarea
-                value={bookingRules.cancellation}
-                onChange={(e) =>
-                  setBookingRules({
-                    ...bookingRules,
-                    cancellation:
-                      e.target.value,
-                  })
-                }
-              />
+          {/* Public website style */}
 
-            </label>
-
+          <div className="preview-card website-style-card">
+            <h3>How should your website feel?</h3>
+            <p>Choose a look you like, or let BookForge match a polished theme to your business type.</p>
+            <div className="website-style-options" role="radiogroup" aria-label="Website style">
+              {[
+                ["auto", "Choose for me", "A polished style matched to your business."],
+                ["modern", "Modern & minimal", "Clean lines and cool, calm tones."],
+                ["warm", "Warm & welcoming", "Soft cream and friendly earthy colors."],
+                ["bold", "Bold & energetic", "High contrast with a vivid accent."],
+                ["elegant", "Elegant & premium", "Deep tones and a refined finish."],
+                ["nature", "Natural & relaxed", "Evergreen accents and soft neutrals."],
+              ].map(([value, title, description]) => (
+                <label className={`website-style-option ${websiteStyle === value ? "selected" : ""}`} key={value}>
+                  <input type="radio" name="website-style" value={value} checked={websiteStyle === value} onChange={() => setWebsiteStyle(value)} />
+                  <span><strong>{title}</strong><small>{description}</small></span>
+                </label>
+              ))}
+            </div>
           </div>
 
           {/* Confirm */}

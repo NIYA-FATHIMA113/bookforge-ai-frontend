@@ -16,46 +16,8 @@ function BusinessList({ onCountChange }) {
 
         const businessList = data.results || data;
 
-        // -----------------------------------------
-        // Add mock AI-created business
-        // -----------------------------------------
-
-        const mockBusiness = localStorage.getItem(
-          "mock_business"
-        );
-
-        let finalBusinesses = businessList;
-
-        if (mockBusiness) {
-          const parsedBusiness =
-            JSON.parse(mockBusiness);
-
-          const mockBusinessForDisplay = {
-            id: `mock-${parsedBusiness.id}`,
-
-            business_name:
-              parsedBusiness.name,
-
-            business_type:
-              parsedBusiness.type,
-
-            location:
-              parsedBusiness.location,
-
-            is_active: true,
-
-            isMock: true,
-          };
-
-          finalBusinesses = [
-            mockBusinessForDisplay,
-            ...businessList,
-          ];
-        }
-
-        setBusinesses(finalBusinesses);
-
-        onCountChange(finalBusinesses.length);
+        setBusinesses(businessList);
+        onCountChange(businessList.length);
 
       } catch (error) {
         setError(error.message);
@@ -148,29 +110,15 @@ function BusinessList({ onCountChange }) {
 
               <div className="business-card-footer">
 
-                {business.isMock ? (
-
-                  <button
-                    onClick={() =>
-                      navigate("/ai-setup")
-                    }
-                  >
-                    Continue Setup
-                  </button>
-
-                ) : (
-
-                  <button
-                    onClick={() =>
-                      navigate(
-                        `/dashboard/business/${business.id}`
-                      )
-                    }
-                  >
-                    Manage Business
-                  </button>
-
-                )}
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/dashboard/business/${business.id}`
+                    )
+                  }
+                >
+                  Manage Business
+                </button>
 
               </div>
 

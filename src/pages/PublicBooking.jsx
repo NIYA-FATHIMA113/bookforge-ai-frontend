@@ -7,10 +7,24 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   "http://127.0.0.1:8000";
 
+function resolveWebsiteTheme(business) {
+  if (business?.website_style && business.website_style !== "auto") {
+    return business.website_style;
+  }
+  return {
+    sports_turf: "bold",
+    salon: "elegant",
+    clinic: "modern",
+    restaurant: "warm",
+  }[business?.business_type] || "nature";
+}
+
 function PublicBooking() {
   const { slug } = useParams();
 
   const [services, setServices] = useState([]);
+  const [businessName, setBusinessName] = useState("");
+  const [business, setBusiness] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
 
   const [selectedDate, setSelectedDate] = useState("");
@@ -41,9 +55,10 @@ function PublicBooking() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          `${API_BASE_URL}/api/book/${slug}/services/`
-        );
+        const [response, businessResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/book/${slug}/services/`),
+          fetch(`${API_BASE_URL}/api/tenants/public/${slug}/`),
+        ]);
 
         if (!response.ok) {
           throw new Error(
@@ -52,6 +67,12 @@ function PublicBooking() {
         }
 
         const data = await response.json();
+        const businessData = await businessResponse.json();
+        if (!businessResponse.ok) {
+          throw new Error(businessData.detail || "Unable to load this business.");
+        }
+        setBusinessName(businessData.business_name || "");
+        setBusiness(businessData);
 
         setServices(data.results || data);
       } catch (error) {
@@ -209,6 +230,8 @@ function PublicBooking() {
     currentStep = 2;
   }
 
+  const websiteTheme = resolveWebsiteTheme(business);
+
   if (selectedDate) {
     currentStep = 3;
   }
@@ -227,7 +250,7 @@ function PublicBooking() {
 
   if (loading) {
     return (
-      <div className="public-booking">
+      <div className="public-booking" data-theme={websiteTheme}>
         <p>
           Loading booking options...
         </p>
@@ -241,7 +264,7 @@ function PublicBooking() {
 
   if (error) {
     return (
-      <div className="public-booking">
+      <div className="public-booking" data-theme={websiteTheme}>
         <p>{error}</p>
       </div>
     );
@@ -252,7 +275,7 @@ function PublicBooking() {
   // --------------------------------
 
   return (
-    <div className="public-booking">
+    <div className="public-booking" data-theme={websiteTheme}>
 
       {/* Progress */}
 
@@ -320,11 +343,15 @@ function PublicBooking() {
 
       {/* Business title */}
 
-      <h1>
-        Book at{" "}
-        {slug.charAt(0).toUpperCase() +
-          slug.slice(1)}
-      </h1>
+      <header className="public-site-hero">
+        <div className="public-site-copy">
+          <p className="public-site-kicker">ONLINE BOOKING</p>
+          <h1>{businessName || slug.charAt(0).toUpperCase() + slug.slice(1)}</h1>
+          <p className="public-site-subtitle">Book your next visit in a few simple steps.</p>
+          {business?.location && <p className="public-site-location">{business.location}</p>}
+        </div>
+        <span className="public-site-mark" aria-hidden="true">BOOK<br />YOUR<br />TIME</span>
+      </header>
 
       {/* Booking success */}
 

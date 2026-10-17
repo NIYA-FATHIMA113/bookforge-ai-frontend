@@ -1,89 +1,174 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OwnerNavigation from "../components/OwnerNavigation";
+import BusinessList from "../components/BusinessList";
 import { apiRequest } from "../services/api";
 import "./Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [tenant, setTenant] = useState(null);
+
+  const [businessCount, setBusinessCount] = useState(0);
   const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loadingSummary, setLoadingSummary] = useState(true);
 
   useEffect(() => {
-    async function loadDashboard() {
+    async function loadSummary() {
       try {
-        setError("");
-        const [tenantData, summaryData] = await Promise.all([
-          apiRequest("/api/tenants/"),
-          apiRequest("/api/dashboard/summary/"),
-        ]);
-        setTenant((tenantData.results || tenantData)[0] || null);
-        setSummary(summaryData);
-      } catch (err) {
-        setError(err.message || "Failed to load your dashboard.");
+        const data = await apiRequest("/api/dashboard/summary/");
+        setSummary(data);
+      } catch (error) {
+        console.error("Failed to load dashboard summary:", error);
       } finally {
-        setLoading(false);
+        setLoadingSummary(false);
       }
     }
 
-    loadDashboard();
+    loadSummary();
   }, []);
 
   const stats = [
-    ["Total bookings", summary?.total_bookings],
-    ["Today’s bookings", summary?.today_bookings],
-    ["Pending", summary?.pending_bookings],
-    ["Confirmed", summary?.confirmed_bookings],
-    ["Completed", summary?.completed_bookings],
-    ["Cancelled", summary?.cancelled_bookings],
+    {
+      label: "Total bookings",
+      value: summary?.total_bookings ?? 0,
+    },
+    {
+      label: "Today's bookings",
+      value: summary?.today_bookings ?? 0,
+    },
+    {
+      label: "Pending",
+      value: summary?.pending_bookings ?? 0,
+    },
+    {
+      label: "Confirmed",
+      value: summary?.confirmed_bookings ?? 0,
+    },
+    {
+      label: "Completed",
+      value: summary?.completed_bookings ?? 0,
+    },
+    {
+      label: "Cancelled",
+      value: summary?.cancelled_bookings ?? 0,
+    },
+    {
+      label: "Total revenue",
+      value: `₹${summary?.total_revenue ?? 0}`,
+      revenue: true,
+    },
   ];
 
   return (
-    <div className="owner-page dashboard-page">
+    <div className="dashboard-page">
       <OwnerNavigation />
+
       <main className="dashboard-content">
+
+        {/* Header */}
         <header className="dashboard-header">
-          <div>
-            <p className="eyebrow">Owner dashboard</p>
-            <h1>{tenant?.business_name || "Your business"}</h1>
-            <p>{tenant?.business_type?.replaceAll("_", " ") || "Business overview"}</p>
-          </div>
-          <button type="button" onClick={() => navigate("/ai-setup")}>Configure with AI</button>
+          <p className="eyebrow">Owner Dashboard</p>
+
+          <h1>Dashboard</h1>
+
+          <p className="dashboard-subtitle">
+            Manage your businesses and bookings from one place.
+          </p>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => navigate("/ai-setup")}
+          >
+            + Create Business with AI
+          </button>
         </header>
 
-        {loading && <p className="dashboard-state">Loading dashboard…</p>}
-        {error && <p className="dashboard-error">{error}</p>}
-        {!loading && !error && !tenant && (
-          <section className="empty-dashboard">
-            <h2>No business yet</h2>
-            <p>Create your first business to start managing bookings.</p>
-          </section>
-        )}
-        {!loading && !error && tenant && (
-          <>
-            <section className="stats" aria-label="Booking summary">
-              {stats.map(([label, value]) => (
-                <article className="stat-card" key={label}>
-                  <p>{label}</p><strong>{value ?? 0}</strong>
-                </article>
-              ))}
-              <article className="stat-card revenue-card">
-                <p>Total revenue</p><strong>₹{summary?.total_revenue ?? 0}</strong>
+        {/* Businesses */}
+        <BusinessList
+          onCountChange={setBusinessCount}
+        />
+
+        {/* Statistics */}
+        <section className="dashboard-stats-section">
+          <div className="section-header">
+            <div>
+              <h2>Booking Overview</h2>
+              <p>
+                A quick overview of your booking activity.
+              </p>
+            </div>
+          </div>
+
+          <div className="dashboard-stats">
+            <article className="stat-card business-count-card">
+              <h3>Businesses</h3>
+              <strong>{businessCount}</strong>
+            </article>
+
+            {stats.map((stat) => (
+              <article
+                className={`stat-card ${
+                  stat.revenue ? "revenue-card" : ""
+                }`}
+                key={stat.label}
+              >
+                <h3>{stat.label}</h3>
+
+                <strong>
+                  {loadingSummary ? "..." : stat.value}
+                </strong>
               </article>
-            </section>
-            <section className="quick-actions">
-              <h2>Manage your business</h2>
-              <div className="quick-actions-grid">
-                <button type="button" onClick={() => navigate("/dashboard/services")}>Services</button>
-                <button type="button" onClick={() => navigate("/dashboard/resources")}>Resources</button>
-                <button type="button" onClick={() => navigate("/dashboard/hours")}>Business hours</button>
-                <button type="button" onClick={() => navigate("/dashboard/bookings")}>Bookings</button>
-              </div>
-            </section>
-          </>
-        )}
+            ))}
+          </div>
+        </section>
+
+        {/* Quick actions */}
+        <section className="quick-actions">
+          <div className="section-header">
+            <div>
+              <h2>Quick Actions</h2>
+              <p>Manage your booking platform quickly.</p>
+            </div>
+          </div>
+
+          <div className="quick-actions-grid">
+
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard/services")}
+            >
+              <strong>+ Add Service</strong>
+              <span>Create a new service</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard/resources")}
+            >
+              <strong>+ Add Resource</strong>
+              <span>Add a bookable resource</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard/bookings")}
+            >
+              <strong>View Bookings</strong>
+              <span>Manage customer bookings</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard/hours")}
+            >
+              <strong>Business Hours</strong>
+              <span>Manage your availability</span>
+            </button>
+
+          </div>
+        </section>
+
       </main>
     </div>
   );
