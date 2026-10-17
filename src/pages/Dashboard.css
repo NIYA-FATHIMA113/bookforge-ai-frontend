@@ -87,6 +87,51 @@
   gap: 20px;
 }
 
+.business-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 22px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.business-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.business-pagination-controls button {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.business-pagination-controls button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 560px) {
+  .business-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .business-pagination-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 .business-card {
   padding: 24px;
   background: #ffffff;

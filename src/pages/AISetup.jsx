@@ -212,6 +212,11 @@ const handleConfirm = async () => {
       body: JSON.stringify({
         conversation_id: conversationId,
         website_style: websiteStyle,
+        services: services.map(({ name, duration, price }) => ({
+          name: name.trim(),
+          duration_minutes: Number(duration),
+          price: Number(price),
+        })),
       }),
     });
 
@@ -503,7 +508,6 @@ const handleConfirm = async () => {
 
               <button
                 type="button"
-                disabled
                 onClick={addService}
               >
                 + Add Service
@@ -519,8 +523,8 @@ const handleConfirm = async () => {
                 >
 
                   <input
-                    readOnly
                     value={service.name}
+                    aria-label="Service name"
                     onChange={(e) =>
                       updateService(
                         service.id,
@@ -531,9 +535,9 @@ const handleConfirm = async () => {
                   />
 
                   <input
-                    readOnly
                     type="number"
                     min="1"
+                    aria-label="Duration in minutes"
                     value={service.duration}
                     onChange={(e) =>
                       updateService(
@@ -545,9 +549,10 @@ const handleConfirm = async () => {
                   />
 
                   <input
-                    readOnly
                     type="number"
                     min="0"
+                    step="0.01"
+                    aria-label="Service price in rupees"
                     value={service.price}
                     onChange={(e) =>
                       updateService(
@@ -560,7 +565,6 @@ const handleConfirm = async () => {
 
                   <button
                     type="button"
-                    disabled
                     onClick={() =>
                       removeService(service.id)
                     }

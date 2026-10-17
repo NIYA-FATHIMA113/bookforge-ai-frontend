@@ -6,18 +6,25 @@ function BusinessList({ onCountChange }) {
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 5;
 
   const navigate = useNavigate();
 
   useEffect(() => {
     async function loadBusinesses() {
+      setLoading(true);
+      setError("");
       try {
-        const data = await apiRequest("/api/tenants/");
+        const data = await apiRequest(`/api/tenants/?page=${page}`);
 
         const businessList = data.results || data;
 
         setBusinesses(businessList);
-        onCountChange(businessList.length);
+        const count = data.count ?? businessList.length;
+        setTotalCount(count);
+        onCountChange(count);
 
       } catch (error) {
         setError(error.message);
@@ -27,7 +34,7 @@ function BusinessList({ onCountChange }) {
     }
 
     loadBusinesses();
-  }, [onCountChange]);
+  }, [onCountChange, page]);
 
   if (loading) {
     return <p>Loading businesses...</p>;
@@ -45,7 +52,7 @@ function BusinessList({ onCountChange }) {
           <h2>My Businesses</h2>
 
           <p>
-            Manage your businesses and booking platforms.
+            Manage your businesses and booking platforms. {totalCount} total.
           </p>
         </div>
       </div>
@@ -128,6 +135,31 @@ function BusinessList({ onCountChange }) {
 
         </div>
 
+      )}
+
+      {totalCount > pageSize && (
+        <nav className="business-pagination" aria-label="Business list pages">
+          <span>
+            Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)} of {totalCount}
+          </span>
+          <div className="business-pagination-controls">
+            <button
+              type="button"
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              disabled={page === 1 || loading}
+            >
+              Previous
+            </button>
+            <span>Page {page} of {Math.ceil(totalCount / pageSize)}</span>
+            <button
+              type="button"
+              onClick={() => setPage((current) => current + 1)}
+              disabled={page >= Math.ceil(totalCount / pageSize) || loading}
+            >
+              Next
+            </button>
+          </div>
+        </nav>
       )}
 
     </section>
