@@ -23,6 +23,9 @@ function AISetup() {
   const [aiLoading, setAiLoading] = useState(false);
   const [services, setServices] = useState([]);
   const [resources, setResources] = useState([]);
+  const previewTheme = websiteStyle === "auto"
+    ? ({ sports_turf: "bold", salon: "elegant", clinic: "modern", restaurant: "warm" }[business.type] || "nature")
+    : websiteStyle;
 
   const [hours, setHours] = useState({
     days: "",
@@ -771,18 +774,30 @@ const handleConfirm = async () => {
             <p>Choose a look you like, or let BookForge match a polished theme to your business type.</p>
             <div className="website-style-options" role="radiogroup" aria-label="Website style">
               {[
-                ["auto", "Choose for me", "A polished style matched to your business."],
+                ["auto", "Choose for me", "A polished look matched to your business."],
                 ["modern", "Modern & minimal", "Clean lines and cool, calm tones."],
                 ["warm", "Warm & welcoming", "Soft cream and friendly earthy colors."],
                 ["bold", "Bold & energetic", "High contrast with a vivid accent."],
                 ["elegant", "Elegant & premium", "Deep tones and a refined finish."],
                 ["nature", "Natural & relaxed", "Evergreen accents and soft neutrals."],
+                ["3d", "3D Motion", "Layered color, depth, and gentle movement."],
+                ["illustrated", "Illustrated", "Scenic shapes and a hand-painted feel."],
+                ["playful", "Cartoon Pop", "Rounded forms, bright color, and bold outlines."],
               ].map(([value, title, description]) => (
                 <label className={`website-style-option ${websiteStyle === value ? "selected" : ""}`} key={value}>
                   <input type="radio" name="website-style" value={value} checked={websiteStyle === value} onChange={() => setWebsiteStyle(value)} />
-                  <span><strong>{title}</strong><small>{description}</small></span>
+                  <span className={`style-option-art theme-${value}`} aria-hidden="true"><i /><i /><b /></span>
+                  <span className="style-option-copy"><strong>{title}</strong><small>{description}</small></span>
                 </label>
               ))}
+            </div>
+            <div className={`website-style-live-preview theme-${previewTheme}`} aria-live="polite">
+              <div className="style-preview-window">
+                <div className="style-preview-top"><i /><i /><i /><span>BOOK A VISIT</span></div>
+                <div className="style-preview-scene"><small>WELCOME TO</small><strong>{business.name || "Your business"}</strong><span>Find a time that works for you</span><b>Explore services</b></div>
+                <div className="style-preview-service"><i /><span><b>{services[0]?.name || "Your service"}</b><small>Choose a service and book online</small></span><em>›</em></div>
+              </div>
+              <p>Live style preview · {websiteStyle === "auto" ? `Matched to ${business.type || "your business"}` : websiteStyle === "3d" ? "3D Motion" : websiteStyle === "illustrated" ? "Illustrated" : websiteStyle === "playful" ? "Cartoon Pop" : websiteStyle}</p>
             </div>
           </div>
 
