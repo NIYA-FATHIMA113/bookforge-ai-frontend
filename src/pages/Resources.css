@@ -38,14 +38,14 @@
 .resource-form .resource-cancel { background: transparent; }
 
 .resources-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin-top: 18px; }
-.resource-card { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-width: 0; padding: 17px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; }
-.resource-card-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.resource-card { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 16px; min-width: 0; box-sizing: border-box; padding: 17px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; }
+.resource-card-title { display: flex; flex: 1 1 150px; align-items: center; gap: 12px; min-width: 0; }
 .resource-icon { display: grid; width: 38px; height: 38px; flex-shrink: 0; place-items: center; border-radius: 9px; background: #f3f4f6; color: #4b5563; font-size: 17px; }
 .resource-card h3 { overflow: hidden; margin: 0 0 6px; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
 .resource-active, .resource-inactive { font-size: 11px; font-weight: 650; }
 .resource-active { color: #166534; }
 .resource-inactive { color: #6b7280; }
-.resource-actions { display: flex; flex-shrink: 0; gap: 7px; }
+.resource-actions { display: flex; flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
 .resource-actions button { min-height: 34px; padding: 0 10px; font-size: 12px; }
 .resource-actions button:hover, .resource-form .resource-cancel:hover { background: #f3f4f6; }
 
